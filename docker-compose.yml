@@ -1,0 +1,13 @@
+services:
+  deno-app:
+    image: denoland/deno:alpine
+    container_name: deno-protoscript
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - "9000:9000"
+    command: ["run", "--allow-net", "--allow-read", "--allow-env", "main.ts"]
+    environment:
+      - DENO_DIR=/app/.deno_dir
+    restart: unless-stopped

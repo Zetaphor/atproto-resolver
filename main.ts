@@ -115,7 +115,7 @@ async function handleRequest(request: Request): Promise<Response> {
   }
 }
 
-const PORT = 8080;
+const PORT = 9000;
 const HOSTNAME = "0.0.0.0";
 
 console.log(`Server running on http://${HOSTNAME}:${PORT}`);
