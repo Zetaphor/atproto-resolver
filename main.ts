@@ -44,6 +44,25 @@ async function resolveHandleWithPds(handle: string): Promise<{ did: string, pdsU
   }
 }
 
+// Add CORS headers to all responses
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+// Add helper function to create consistent responses
+function createResponse(body: unknown, status = 200, additionalHeaders = {}) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+      ...corsHeaders,
+      ...additionalHeaders,
+    },
+  });
+}
+
 async function handleRequest(request: Request): Promise<Response> {
   try {
     const url = new URL(request.url);
@@ -51,11 +70,7 @@ async function handleRequest(request: Request): Promise<Response> {
     // Handle CORS preflight requests
     if (request.method === "OPTIONS") {
       return new Response(null, {
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
+        headers: corsHeaders,
       });
     }
 
@@ -63,55 +78,30 @@ async function handleRequest(request: Request): Promise<Response> {
     if (request.method === "GET") {
       const handle = url.searchParams.get("handle");
       if (!handle) {
-        return new Response("Handle parameter is required", {
-          status: 400,
-          headers: { "Access-Control-Allow-Origin": "*" }
-        });
+        return createResponse({ error: "Handle parameter is required" }, 400);
       }
 
       const result = await resolveHandleWithPds(handle);
-      return new Response(JSON.stringify({ handle, ...result }), {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        }
-      });
+      return createResponse({ handle, ...result });
     }
 
     // POST request - handle comes from request body
     if (request.method === "POST") {
       const { handle } = await request.json();
       if (!handle) {
-        return new Response("Handle is required in request body", {
-          status: 400,
-          headers: { "Access-Control-Allow-Origin": "*" }
-        });
+        return createResponse({ error: "Handle is required in request body" }, 400);
       }
 
       const result = await resolveHandleWithPds(handle);
-      return new Response(JSON.stringify({ handle, ...result }), {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        }
-      });
+      return createResponse({ handle, ...result });
     }
 
-    return new Response("Method not allowed", {
-      status: 405,
-      headers: { "Access-Control-Allow-Origin": "*" }
-    });
+    return createResponse({ error: "Method not allowed" }, 405);
   } catch (error) {
     console.error("Error processing request:", error);
-    return new Response(JSON.stringify({
+    return createResponse({
       error: error instanceof Error ? error.message : "Unknown error"
-    }), {
-      status: 500,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
-      }
-    });
+    }, 500);
   }
 }
 
