@@ -1,7 +1,7 @@
 services:
   deno-app:
     image: denoland/deno:alpine
-    container_name: deno-protoscript
+    container_name: atproto-resolver
     working_dir: /app
     volumes:
       - ./:/app
