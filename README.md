@@ -21,6 +21,7 @@ A live version of this service is hosted at https://resolver.atdev.pro
 ```bash
 git clone https://github.com/yourusername/atproto-handle-resolver.git
 cd atproto-handle-resolver
+```
 
 ## Usage
 
